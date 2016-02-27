@@ -30,7 +30,7 @@ from ctypes.wintypes import LONG
 import enum
 
 from errors import MSPError
-from logger import logger
+from logger import Logger
 
 STATUS_T = LONG
 
@@ -40,11 +40,11 @@ class StatusCode(enum.IntEnum):
 
 
 class API(object):
-    logger = logger
 
     def __init__(self, dll):
         self.dll = dll
         self.unsupported = []
+        self.logger = Logger()
 
     def isImplemented(self, funcName):
         return funcName not in self.unsupported
