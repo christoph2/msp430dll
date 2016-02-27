@@ -64,6 +64,9 @@ class Logger(object):
     def error(self, message):
         self.log(message, logging.ERROR)
 
+    def debug(self, message):
+        self.log(message, logging.DEBUG)
+
     def critical(self, message):
         self.log(message, logging.CRITICAL)
 
