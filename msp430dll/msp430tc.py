@@ -41,7 +41,7 @@ from debug import DebugAPI, RUN_MODES
 from logger import Logger
 
 MSP430_DLL = "msp430"
-MSP_DLL = r"c:\Program Files (x86)\IAR Systems\Embedded Workbench 6.4\430\bin"
+MSP_DLL = r"."
 
 """
 #ifdef WIN32
@@ -50,24 +50,6 @@ static const char tilib_filename[] = "MSP430.DLL";
 static const char tilib_filename[] = "libmsp430.so";
 #endif
 """
-
-##
-##def defaultChecker(result, func, args):
-##    if result == StatusCode.STATUS_ERROR:
-##        errorCode = GetLastError()
-##        #errorMsg = FormatMessage(errorCode)
-##        raise ctypes.WinError(errorCode, "{0}: {1}".format(func.__name__, errorMsg))
-##    return args
-##
-##def nullPointerChecker(result, func, args):
-##    if result is None:
-##        errorCode = GetLastError()
-##        if errorCode:
-##            errorMsg = FormatMessage(errorCode)
-##            raise ctypes.WinError(errorCode, "{0}: {1}".format(func.__name__, errorMsg))
-##    return args
-##
-
 
 Instance = namedtuple('Instance', 'klass dll')
 
