@@ -31,12 +31,11 @@ import logging
 
 class Logger(object):
 
-    LOGGER_BASE_NAME = 'pya2l'
+    LOGGER_BASE_NAME = 'msp430'
     FORMAT = "[%(levelname)s (%(name)s)]: %(message)s"
 
-    def __init__(self, parent, name, level = logging.WARN):
-        self.parent = parent
-        self.logger = logging.getLogger("{0}.{1}".format(self.LOGGER_BASE_NAME, name))
+    def __init__(self, level = logging.WARN):
+        self.logger = logging.getLogger("{0}".format(self.LOGGER_BASE_NAME))
         self.logger.setLevel(level)
         handler = logging.StreamHandler()
         handler.setLevel(level)
@@ -54,9 +53,7 @@ class Logger(object):
     def log(self, message, level):
         self.lastSeverity = level
         self.lastMessage = message
-        self.logger.log(level, "{0}:{1}: {2}".format(
-            os.path.split(self.parent.filename)[1], self.parent.lineNo,  message)
-        )
+        self.logger.log(level, "{0}".format(message))
 
     def info(self, message):
         self.log(message, logging.INFO)
