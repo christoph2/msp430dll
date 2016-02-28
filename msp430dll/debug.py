@@ -31,8 +31,8 @@ from ctypes import addressof, byref, create_string_buffer, cast, c_char, c_char_
 from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, ULONG, LPVOID, WINFUNCTYPE
 
 import enum
-from api import API, StatusCode, STATUS_T
-from base import ReadWriteType
+from msp430dll.api import API, StatusCode, STATUS_T
+from msp430dll.base import ReadWriteType
 
 class DEVICE_REGISTERS(enum.IntEnum):
     R0 = 0

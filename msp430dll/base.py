@@ -31,51 +31,51 @@ from ctypes import addressof, byref, create_string_buffer, cast, c_char, c_char_
 from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, ULONG, LPVOID, WINFUNCTYPE
 
 import enum
-from api import API, StatusCode, STATUS_T
-from errors import ErrorType
+from msp430dll.api import API, StatusCode, STATUS_T
+from msp430dll.errors import ErrorType
 
 class _DeviceStructure(Structure):
         # actually 108 Bytes.
         _pack_ = 1
         _fields_ = [
-            ("endian", WORD),                   # The value 0xaa55.
-            ("id", WORD),                       # Identification number.
-            ("string", BYTE * 32),              # Identification string.
-            ("mainStart", WORD),                # MAIN MEMORY starting address.
-            ("infoStart", WORD),                # INFORMATION MEMORY starting address.
-            ("ramEnd", WORD),                   # RAM ending address.
-            ("nBreakpoints", WORD),             # Number of breakpoints.
-            ("emulation", WORD),                # Emulation level.
-            ("clockControl", WORD),             # Clock control level.
-            ("lcdStart", WORD),                 # LCD starting address.
-            ("lcdEnd", WORD),                   # LCD ending address.
-            ("vccMinOp", WORD),                 # Vcc minimum during operation [mVolts].
-            ("vccMaxOp", WORD),                 # Vcc maximum during operation [mVolts].
-            ("hasTestVpp", WORD),               # Device has TEST/VPP.
-            ("ramStart", WORD),                 # RAM starting address.
-            ("ram2Start", WORD),                # RAM2 starting address.
-            ("ram2End", WORD),                  # RAM2 ending address.
-            ("infoEnd", WORD),                  # INFO ending address.
-            ("mainEnd", ULONG),                 # MAIN ending address.
-            ("bslStart", WORD),                 # BSL starting  address.
-            ("bslEnd", WORD),                   # BSL ending address.
-            ("nRegTrigger", WORD),              # Number of CPU Register Trigger.
-            ("nCombinations", WORD),            # Number of EEM Trigger Combinations.
-            ("cpuArch", BYTE),                  # The MSP430 architecture (non-X, X or Xv2).
-            ("jtagId", BYTE),                   # The JTAG ID - value returned on an instruction shift.
-            ("coreIpId", WORD),                 # The CoreIP ID.
-            ("deviceIdPtr", ULONG),             # The Device-ID Pointer.
-            ("eemVersion", WORD),               # The EEM Version Number.
-            ("nBreakpointsOptions", WORD),      # Breakpoint Modes.
+            ("endian", WORD),                   #: The value 0xaa55.
+            ("id", WORD),                       #: Identification number.
+            ("string", BYTE * 32),              #: Identification string.
+            ("mainStart", WORD),                #: MAIN MEMORY starting address.
+            ("infoStart", WORD),                #: INFORMATION MEMORY starting address.
+            ("ramEnd", WORD),                   #: RAM ending address.
+            ("nBreakpoints", WORD),             #: Number of breakpoints.
+            ("emulation", WORD),                #: Emulation level.
+            ("clockControl", WORD),             #: Clock control level.
+            ("lcdStart", WORD),                 #: LCD starting address.
+            ("lcdEnd", WORD),                   #: LCD ending address.
+            ("vccMinOp", WORD),                 #: Vcc minimum during operation [mVolts].
+            ("vccMaxOp", WORD),                 #: Vcc maximum during operation [mVolts].
+            ("hasTestVpp", WORD),               #: Device has TEST/VPP.
+            ("ramStart", WORD),                 #: RAM starting address.
+            ("ram2Start", WORD),                #: RAM2 starting address.
+            ("ram2End", WORD),                  #: RAM2 ending address.
+            ("infoEnd", WORD),                  #: INFO ending address.
+            ("mainEnd", ULONG),                 #: MAIN ending address.
+            ("bslStart", WORD),                 #: BSL starting  address.
+            ("bslEnd", WORD),                   #: BSL ending address.
+            ("nRegTrigger", WORD),              #: Number of CPU Register Trigger.
+            ("nCombinations", WORD),            #: Number of EEM Trigger Combinations.
+            ("cpuArch", BYTE),                  #: The MSP430 architecture (non-X, X or Xv2).
+            ("jtagId", BYTE),                   #: The JTAG ID - value returned on an instruction shift.
+            ("coreIpId", WORD),                 #: The CoreIP ID.
+            ("deviceIdPtr", ULONG),             #: The Device-ID Pointer.
+            ("eemVersion", WORD),               #: The EEM Version Number.
+            ("nBreakpointsOptions", WORD),      #: Breakpoint Modes.
             ("nBreakpointsReadWrite", WORD),
             ("nBreakpointsDma", WORD),
-            ("nTrigerMask", WORD),              # Trigger Mask for Breakpoint.
-            ("nRegTriggerOperations", WORD),    # Register Trigger modes.
-            ("nStateStorage", WORD),            # MSP430 has Stage Storage.
-            ("nCycleCounter", WORD),            # Number of cycle counters of MSP430.
-            ("nCycleCounterOperations", WORD),  # Cycle couter modes.
-            ("nSequencer", WORD),               # Msp430 has Sequencer.
-            ("hasFramMemory", WORD),            #  Msp430 has FRAM Memory.
+            ("nTrigerMask", WORD),              #: Trigger Mask for Breakpoint.
+            ("nRegTriggerOperations", WORD),    #: Register Trigger modes.
+            ("nStateStorage", WORD),            #: MSP430 has Stage Storage.
+            ("nCycleCounter", WORD),            #: Number of cycle counters of MSP430.
+            ("nCycleCounterOperations", WORD),  #: Cycle couter modes.
+            ("nSequencer", WORD),               #: Msp430 has Sequencer.
+            ("hasFramMemory", WORD),            #:  Msp430 has FRAM Memory.
         ]
 
 
@@ -104,7 +104,7 @@ class Device(Union):
     _fields_ = [("buffer", c_char * 112), ("s", _DeviceStructure)]
 
 
-DEVICE_UNKNOWN  = 0 # Device id for unknown device.
+DEVICE_UNKNOWN  = 0 #: Device id for unknown device.
 
 class ArchType(enum.IntEnum):
     CPU_ARCH_ORIGINAL   = 0
@@ -123,36 +123,36 @@ class EnableDisableType(enum.IntEnum):  # TODO: xxxType!!!
 
 
 class ResetMethodType(enum.IntEnum):
-    PUC_RESET   = (1 << 0)  # Power up clear (i.e., a "soft") reset.
-    RST_RESET   = (1 << 1)  # RST/NMI (i.e., "hard").
-    VCC_RESET   = (1 << 2)  # Cycle Vcc (i.e., a "power on") reset.
+    PUC_RESET   = (1 << 0)  #: Power up clear (i.e., a "soft") reset.
+    RST_RESET   = (1 << 1)  #: RST/NMI (i.e., "hard").
+    VCC_RESET   = (1 << 2)  #: Cycle Vcc (i.e., a "power on") reset.
     FORCE_RESET = (1 << 3)
 
-    # combines all possible reset methods enumerated in enum RESET_METHOD.
+    #: combines all possible reset methods enumerated in enum RESET_METHOD.
     ALL_RESETS = (PUC_RESET | RST_RESET | VCC_RESET)
-    # forces a Power up clear reset.
+    #: forces a Power up clear reset.
     FORCE_PUC_RESET = (FORCE_RESET | PUC_RESET)
-    # forces a RST/NMI clear reset.
-    # Non-Xv2 devices will be running and executing code after the reset.
+    #: forces a RST/NMI clear reset.
+    #: Non-Xv2 devices will be running and executing code after the reset.
     FORCE_RST_RESET = (FORCE_RESET | RST_RESET)
-    # forces a Vcc clear reset.
-    # Non-Xv2 devices will be running and executing code after the reset.
+    #: forces a Vcc clear reset.
+    #: Non-Xv2 devices will be running and executing code after the reset.
     FORCE_VCC_RESET = (FORCE_RESET | VCC_RESET)
 
 
 class EraseType(enum.IntEnum):
-    ERASE_SEGMENT = 0   # Erase a segment.
-    ERASE_MAIN = 1      # Erase all MAIN memory.
-    ERASE_ALL = 2       # Erase all MAIN and INFORMATION memory not including IP protected area.
-    ERASE_TOTAL = 3     # Erase all MAIN and INFORMATION memory including IP protected area.
+    ERASE_SEGMENT = 0   #: Erase a segment.
+    ERASE_MAIN = 1      #: Erase all MAIN memory.
+    ERASE_ALL = 2       #: Erase all MAIN and INFORMATION memory not including IP protected area.
+    ERASE_TOTAL = 3     #: Erase all MAIN and INFORMATION memory including IP protected area.
 
 
 class ConfigModeType(enum.IntEnum):
-    VERIFICATION_MODE = 0       # Verify data downloaded to FLASH memories.
-    EMULATION_MODE = 1          # 4xx emulation mode.
-    LOCKED_FLASH_ACCESS = 5     # Allows Locked Info Mem Segment A access (if set to '1').
-    EDT_TRACE_MODE = 7          # Trace mode in EDT file format.
-    INTERFACE_MODE = 8          # Configure interface protocol: JTAG or Spy-bi-Wire (see enum INTERFACE_TYPE).
+    VERIFICATION_MODE = 0       #: Verify data downloaded to FLASH memories.
+    EMULATION_MODE = 1          #: 4xx emulation mode.
+    LOCKED_FLASH_ACCESS = 5     #: Allows Locked Info Mem Segment A access (if set to '1').
+    EDT_TRACE_MODE = 7          #: Trace mode in EDT file format.
+    INTERFACE_MODE = 8          #: Configure interface protocol: JTAG or Spy-bi-Wire (see enum INTERFACE_TYPE).
     # Configure a value that will be placed on the devices' MemoryDataBus
     # right before the device gets released from JTAG.
     # Used for Software Breakpoints.
@@ -186,28 +186,28 @@ class ConfigModeType(enum.IntEnum):
 
 
 class InterfaceType(enum.IntEnum):
-    JTAG_IF = 0             # 4 Wire JTAG protocol used.
-    SPYBIWIRE_IF = 1        # 2 Wire (Spy-bi-wire) JTAG protocol used.
-    SPYBIWIREJTAG_IF = 2    # 2 Wire Devices accessed by 4wire JTAG protocol.
-    AUTOMATIC_IF = 3        # Protocol will be detected automatically.
+    JTAG_IF = 0             #: 4 Wire JTAG protocol used.
+    SPYBIWIRE_IF = 1        #: 2 Wire (Spy-bi-wire) JTAG protocol used.
+    SPYBIWIREJTAG_IF = 2    #: 2 Wire Devices accessed by 4wire JTAG protocol.
+    AUTOMATIC_IF = 3        #: Protocol will be detected automatically.
 
 
 class FileType(enum.IntEnum):
-    FILETYPE_AUTO = 0       # Auto detect */
-    FILETYPE_TI_TXT = 1     # TI text */
-    FILETYPE_INTEL_HEX = 2  # Intel hex */
+    FILETYPE_AUTO = 0       #: Auto detect */
+    FILETYPE_TI_TXT = 1     #: TI text */
+    FILETYPE_INTEL_HEX = 2  #: Intel hex */
 
 
 class SystemEventMSPType(enum.IntEnum):
-    # System event FET connection is lost.
+    #: System event FET connection is lost.
     FET_CONNECTION_LOST     = 0
-    # System event device connection is lost.
+    #: System event device connection is lost.
     DEVICE_CONNECTION_LOST  = 1
-    # System event FET restart needed.
+    #: System event FET restart needed.
     FET_RESTART_NEEDED      = 2
-    # System event device entered LPMx.5.
+    #: System event device entered LPMx.5.
     DEVICE_IN_LPM5_MODE     = 3
-    # System event devices wakes up from LPMx.5.
+    #: System event devices wakes up from LPMx.5.
     DEVICE_WAKEUP_LPM5_MODE = 4
 
 # UmsSchedulerProc = WINFUNCTYPE(None, c_int32, POINTER(wintypes.ULONG), wintypes.LPVOID)

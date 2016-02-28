@@ -29,8 +29,8 @@ __copyright__ = """
 from ctypes.wintypes import LONG
 import enum
 
-from errors import MSPError
-from logger import Logger
+from msp430dll.errors import MSPError
+from msp430dll.logger import Logger
 
 STATUS_T = LONG
 

@@ -35,10 +35,10 @@ from pprint import pprint
 import os
 import threading
 
-from api import API, StatusCode, STATUS_T
-from base import BaseAPI, FileType
-from debug import DebugAPI, RUN_MODES
-from logger import Logger
+from msp430dll.api import API, StatusCode, STATUS_T
+from msp430dll.base import BaseAPI, FileType
+from msp430dll.debug import DebugAPI, RUN_MODES
+from msp430dll.logger import Logger
 
 MSP430_DLL = "msp430"
 MSP_DLL = r"."
