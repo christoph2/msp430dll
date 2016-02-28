@@ -80,6 +80,7 @@ class Logger(object):
         LEVEL_MAP = {
             "INFO": logging.INFO,
             "WARN": logging.WARN,
+            "DEBUG": logging.DEBUG,
             "ERROR": logging.ERROR,
             "CRITICAL": logging.CRITICAL,
         }
