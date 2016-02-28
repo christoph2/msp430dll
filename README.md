@@ -7,7 +7,7 @@ Welcome to MSP430DLL!
 
 MSP430DLL is a convenient Python wrapper for TI MSP430 (tool) developers.
 
-This is still work in progress and reasonable documentation has to be wrritten...
+This is still work in progress and reasonable documentation has to be written...
 
 ### Prerequisites
 
