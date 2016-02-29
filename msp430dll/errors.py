@@ -193,14 +193,14 @@ class TestErrorCodes(unittest.TestCase):
 
     def testErrorCodeInNotEnum(self):
         with self.assertRaises(KeyError):
-            ErrorType['FooBar']
+            value = ErrorType['FooBar']
 
     def testErrorCodeInErrorMap(self):
         self.assertEquals(ERROR_MAP[ErrorType.USB_FET_NOT_FOUND_ERR], 'Could not find MSP-FET430UIF on specified COM port')
 
     def testErrorCodeInNotErrorMap(self):
         with self.assertRaises(KeyError):
-            ERROR_MAP['FooBar']
+            value = ERROR_MAP['FooBar']
 
 
 if __name__ == '__main__':

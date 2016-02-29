@@ -26,12 +26,12 @@ __copyright__ = """
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-from collections import namedtuple, OrderedDict
-from ctypes import addressof, byref, create_string_buffer, cast, c_char, c_char_p, c_int32, POINTER, Structure, Union
-from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, ULONG, LPVOID, WINFUNCTYPE
+from collections import OrderedDict
+from ctypes import addressof, byref, create_string_buffer, cast, c_char, c_char_p, c_int32, POINTER, Union
+from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, LPVOID, WINFUNCTYPE
 
 import enum
-from msp430dll.api import API, StatusCode, STATUS_T
+from msp430dll.api import API, STATUS_T
 from msp430dll.base import ReadWriteType
 
 class DEVICE_REGISTERS(enum.IntEnum):

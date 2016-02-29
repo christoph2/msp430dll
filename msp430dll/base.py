@@ -28,10 +28,10 @@ __copyright__ = """
 
 from collections import namedtuple
 from ctypes import addressof, byref, create_string_buffer, cast, c_char, c_char_p, c_int32, POINTER, Structure, Union
-from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, ULONG, LPVOID, WINFUNCTYPE
+from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, ULONG, WINFUNCTYPE
 
 import enum
-from msp430dll.api import API, StatusCode, STATUS_T
+from msp430dll.api import API, STATUS_T
 from msp430dll.errors import ErrorType
 
 class _DeviceStructure(Structure):
@@ -317,7 +317,7 @@ class BaseAPI(API):
 
     def openDevice(self, device = "DEVICE_UNKNOWN", password = "", deviceCode = 0, setId = 0):
         device = c_char_p(device)
-        result = self.MSP430_OpenDevice(device, c_char_p(password), len(password), LONG(deviceCode), LONG(setId))
+        self.MSP430_OpenDevice(device, c_char_p(password), len(password), LONG(deviceCode), LONG(setId))
 
     def getJTAGId(self):
         jid = LONG()
@@ -326,7 +326,7 @@ class BaseAPI(API):
 
     def getFoundDevice(self):
         device = create_string_buffer(256)
-        result = self.MSP430_GetFoundDevice(device, LONG(256))
+        self.MSP430_GetFoundDevice(device, LONG(256))
         deviceStructure = cast(device, POINTER(_DeviceStructure))
         content = deviceStructure.contents
         return instanceiateNamedtuple(DeviceStructureNT, content)
