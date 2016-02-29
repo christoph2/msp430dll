@@ -1,6 +1,7 @@
 MSP430DLL
 ===
 ---
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/a8f53cc5ff8a44579aa33504e17ae318)](https://www.codacy.com/app/cpu12-gems/msp430dll)
 [![GPL License](http://img.shields.io/badge/license-GPL-blue.svg)](http://opensource.org/licenses/GPL-2.0)
 
 Welcome to MSP430DLL!
