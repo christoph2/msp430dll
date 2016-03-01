@@ -26,3 +26,76 @@ __copyright__ = """
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
+import ctypes
+from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, ULONG, LPVOID
+from collections import namedtuple
+import os
+
+from msp430dll.api import API, StatusCode, STATUS_T
+from msp430dll.base import BaseAPI, FileType
+from msp430dll.logger import Logger
+
+MSP430_DLL = "msp430"
+MSP_DLL = r"."
+
+"""
+#ifdef WIN32
+static const char tilib_filename[] = "MSP430.DLL";
+#else
+static const char tilib_filename[] = "libmsp430.so";
+#endif
+"""
+
+Instance = namedtuple('Instance', 'klass dll')
+
+class DLL(object):
+
+    _dllInstances = {}
+
+    def __new__(cls, dllPath = MSP_DLL):
+        if dllPath not in DLL._dllInstances:
+            klass = super(DLL, cls).__new__(cls)
+            dll = DLL._loadDll(dllPath)
+
+            baseApi = BaseAPI(dll)
+            baseApi.loadFunctions()
+            klass.base = baseApi
+
+            debugApi = DebugAPI(dll)
+            debugApi.loadFunctions()
+            klass.debug = debugApi
+
+            debugApi.errorNumber = baseApi.errorNumber
+            debugApi.errorString = baseApi.errorString
+
+            DLL._dllInstances[dllPath] = Instance(klass, dll)
+        inst = DLL._dllInstances[dllPath]
+        inst.klass.dll = inst.dll
+        return inst.klass
+
+    @classmethod
+    def _loadDll(cls, dllPath):
+        currentPath = os.getcwd()
+        os.chdir(dllPath)
+        mspDll = ctypes.windll.LoadLibrary(MSP430_DLL)
+        os.chdir(currentPath)
+        return mspDll
+
+    @classmethod
+    def loadedDlls(cls):
+        result = []
+        for path, inst in cls._dllInstances.items():
+            item = "{0}\\{1}.dll".format(path, inst.dll._name)
+            result.append(item)
+        return result
+
+##
+##    def interfaces(self):
+##        result = []
+##        for num in range(self.base.getNumberOfIFs()):
+##            name, status = dll.base.getIF(num)
+##            result.append((name, status, ))
+##        return result
+##
+
+

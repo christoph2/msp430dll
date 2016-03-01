@@ -27,86 +27,18 @@ __copyright__ = """
 """
 
 import binascii
-from collections import namedtuple
-import ctypes
-from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, ULONG, LPVOID
 import enum
 from pprint import pprint
-import os
 import threading
 
-from msp430dll.api import API, StatusCode, STATUS_T
-from msp430dll.base import BaseAPI, FileType
+from msp430dll import DLL
 from msp430dll.debug import DebugAPI, RUN_MODES
-from msp430dll.logger import Logger
-
-MSP430_DLL = "msp430"
-MSP_DLL = r"."
-
-"""
-#ifdef WIN32
-static const char tilib_filename[] = "MSP430.DLL";
-#else
-static const char tilib_filename[] = "libmsp430.so";
-#endif
-"""
-
-Instance = namedtuple('Instance', 'klass dll')
-
-class DLL(object):
-
-    _dllInstances = {}
-
-    def __new__(cls, dllPath):  # Alternativ: PATH scannen.
-        if dllPath not in DLL._dllInstances:
-            klass = super(DLL, cls).__new__(cls)
-            dll = DLL._loadDll(dllPath)
-
-            baseApi = BaseAPI(dll)
-            baseApi.loadFunctions()
-            klass.base = baseApi
-
-            debugApi = DebugAPI(dll)
-            debugApi.loadFunctions()
-            klass.debug = debugApi
-
-            debugApi.errorNumber = baseApi.errorNumber
-            debugApi.errorString = baseApi.errorString
-
-            DLL._dllInstances[dllPath] = Instance(klass, dll)
-        inst = DLL._dllInstances[dllPath]
-        inst.klass.dll = inst.dll
-        return inst.klass
-
-    @classmethod
-    def _loadDll(cls, dllPath):
-        currentPath = os.getcwd()
-        os.chdir(dllPath)
-        mspDll = ctypes.windll.LoadLibrary(MSP430_DLL)
-        os.chdir(currentPath)
-        return mspDll
-
-    @classmethod
-    def loadedDlls(cls):
-        result = []
-        for path, inst in cls._dllInstances.items():
-            item = "{0}\\{1}.dll".format(path, inst.dll._name)
-            result.append(item)
-        return result
-
-    def interfaces(self):
-        result = []
-        for num in range(self.base.getNumberOfIFs()):
-            name, status = dll.base.getIF(num)
-            result.append((name, status, ))
-        return result
-
 
 def myCallback(*params):
     print("myCallback called with: {0}".format(params))
 
 
-dll = DLL(MSP_DLL)
+dll = DLL()
 print hex(dll.base.initialize("TIUSB"))
 
 #dll.base.MSP430_Close(False)
@@ -130,7 +62,7 @@ pprint(sorted(dev._asdict().items()))
 jid  = dll.base.getJTAGId()
 print("JTAG-ID: {0:#x}".format(jid))
 
-print(dll.interfaces())
+#print(dll.interfaces())
 
 result = dll.debug.readRegisters()
 print(result)
