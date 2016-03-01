@@ -26,61 +26,59 @@ __copyright__ = """
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-import binascii
-import enum
+from optparse import OptionParser
 from pprint import pprint
-import threading
+import sys
 
 from msp430dll import DLL
+from msp430dll.base import SystemNotifyCallback
 from msp430dll.debug import DebugAPI, RUN_MODES
 
 def myCallback(*params):
     print("myCallback called with: {0}".format(params))
 
+def displayInfo():
+    dll = DLL()
+    print hex(dll.base.initialize("TIUSB"))
 
-dll = DLL()
-print hex(dll.base.initialize("TIUSB"))
+    #dll.base.MSP430_Close(False)
 
-#dll.base.MSP430_Close(False)
-
-dll.base.setVCC(3000)
-
-#result = dll.base.MSP430_SET_SYSTEM_NOTIFY_CALLBACK(SystemNotifyCallback(myCallback)) # This function should be called after MSP430_OpenDevice() function.
-
-print dll.base.getVCC()
-print dll.base.getExternalVoltage()
-dll.base.openDevice("COM21")
-dev =  dll.base.getFoundDevice()
-pprint(sorted(dev._asdict().items()))
-
-#mem = dll.base.readMemory(dev.infoStart, None, dev.infoStart + dev.infoEnd + 1)
-#dll.base.readOutFile(dev.infoStart, dev.infoStart + dev.infoEnd + 1, "info.hex", FileType.FILETYPE_INTEL_HEX)
+    dll.base.setVCC(3000)
 
 
-# See docs\index.html for further details.
+    print dll.base.getVCC()
+    print dll.base.getExternalVoltage()
+    dll.base.openDevice("COM21")
 
-jid  = dll.base.getJTAGId()
-print("JTAG-ID: {0:#x}".format(jid))
+    result = dll.base.MSP430_SET_SYSTEM_NOTIFY_CALLBACK(SystemNotifyCallback(myCallback))
+    device =  dll.base.getFoundDevice()
+    pprint(sorted(device._asdict().items()))
 
-#print(dll.interfaces())
+    #mem = dll.base.readMemory(dev.infoStart, None, dev.infoStart + dev.infoEnd + 1)
+    #dll.base.readOutFile(dev.infoStart, dev.infoStart + dev.infoEnd + 1, "info.hex", FileType.FILETYPE_INTEL_HEX)
 
-result = dll.debug.readRegisters()
-print(result)
+    jid  = dll.base.getJTAGId()
+    print("JTAG-ID: {0:#x}".format(jid))
 
-dll.debug.writeRegister(5, 4711)
+    #print(dll.interfaces())
 
-result = dll.debug.readRegister(5)
-print(result)
+    result = dll.debug.readRegisters()
+    print(result)
 
-#result = dll.debug.readRegistersExt()
-#print(result)
+    dll.debug.writeRegister(5, 4711)
 
-#print(DLL.loadedDlls())
+    result = dll.debug.readRegister(5)
+    print(result)
 
-print("STATE: {0}".format(dll.debug.getState(1)))
+    #result = dll.debug.readRegistersExt()
+    #print(result)
 
-dll.debug.run(RUN_MODES.FREE_RUN, 1)
-#print dll.base.MSP430_Close(0)
+    #print(DLL.loadedDlls())
+
+    print("STATE: {0}".format(dll.debug.getState(1)))
+
+    dll.debug.run(RUN_MODES.FREE_RUN, 1)
+    print dll.base.MSP430_Close(0)
 
 
 
@@ -116,13 +114,24 @@ dll.debug.run(RUN_MODES.FREE_RUN, 1)
 """
 
 # MSP430_FET.h - MSP-FET430UIF maintenance functions.
-"""
-If you don't know UML statecharts, here an example: ===, its abaout these small black circles...
-"""
 
-"""
-echo '0e4c 0d40 3d50 0c00' | ./disassembler.py -x -
-      0: 0E4C           mov    R12, R14
-      1: 0D40           mov    PC, R13
-      2: 3D50 0C00      add    #0xc, R13
-"""
+def main():
+    usage = "Usage: {0} [options] path-to-msp430.dll".format(sys.argv[0])
+
+    options=[]
+    args=[]
+
+    op = OptionParser(usage = usage,version = "%prog " + __version__, description = "Display informations about connected MSP430 controllers.")
+    op.add_option('-f', '--dump-flash', help = "dump content of flash memory", dest = "dumpFlash", action = 
+    "store_true", default = False)
+
+    (options, args) = op.parse_args()
+    if len(args) >= 1:
+        filename = args[0]
+    else:
+        filename = "."
+    displayInfo()
+
+if __name__ == '__main__':
+    main()
+

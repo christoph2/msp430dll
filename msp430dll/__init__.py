@@ -33,6 +33,7 @@ import os
 
 from msp430dll.api import API, StatusCode, STATUS_T
 from msp430dll.base import BaseAPI, FileType
+from msp430dll.debug import DebugAPI
 from msp430dll.logger import Logger
 
 MSP430_DLL = "msp430"
