@@ -56,7 +56,7 @@ class API(object):
             errstr = self.errorString(errno)
             raise MSPError("{0} -- {1}.".format(errno, errstr), errno = errno)
         elif value != 0:
-            pass # unexpected!
+            self.warn("Unexpected return value: {0}".format(value))
         return StatusCode(value)
 
     def functionFactory(self, library, functionName, resultType, argTypes, errorChecker = None):
