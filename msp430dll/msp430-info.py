@@ -33,6 +33,7 @@ import sys
 from msp430dll import DLL
 from msp430dll.base import SystemNotifyCallback
 from msp430dll.debug import DebugAPI, RUN_MODES
+from msp430dll.utils import cygpathToWin
 
 def myCallback(*params):
     print("myCallback called with: {0}".format(params))
@@ -127,8 +128,8 @@ def main():
     if len(args) >= 1:
         pathToDll = args[0]
     else:
-        filename = "."
-    displayInfo(pathToDll)
+        pathToDll = "."
+    displayInfo(cygpathToWin(pathToDll))
 
 if __name__ == '__main__':
     main()
