@@ -39,6 +39,7 @@ def myCallback(*params):
 
 def displayInfo(pathToDll, port = 'TIUSB'):
     dll = DLL(pathToDll)
+    dll.logger.setLevel("debug")
     print hex(dll.base.initialize(port))
 
     dll.base.setVCC(3000)

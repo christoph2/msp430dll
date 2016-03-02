@@ -56,6 +56,7 @@ class DLL(object):
         if dllPath not in DLL._dllInstances:
             klass = super(DLL, cls).__new__(cls)
             dll = DLL._loadDll(dllPath)
+            cls.logger = Logger()
 
             baseApi = BaseAPI(dll)
             baseApi.loadFunctions()
