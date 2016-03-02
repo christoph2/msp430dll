@@ -37,18 +37,15 @@ from msp430dll.debug import DebugAPI, RUN_MODES
 def myCallback(*params):
     print("myCallback called with: {0}".format(params))
 
-def displayInfo():
-    dll = DLL()
-    print hex(dll.base.initialize("TIUSB"))
-
-    #dll.base.MSP430_Close(False)
+def displayInfo(pathToDll, port = 'TIUSB'):
+    dll = DLL(pathToDll)
+    print hex(dll.base.initialize("port))
 
     dll.base.setVCC(3000)
 
-
     print dll.base.getVCC()
     print dll.base.getExternalVoltage()
-    dll.base.openDevice("COM21")
+    dll.base.openDevice()
 
     result = dll.base.MSP430_SET_SYSTEM_NOTIFY_CALLBACK(SystemNotifyCallback(myCallback))
     device =  dll.base.getFoundDevice()
@@ -127,10 +124,10 @@ def main():
 
     (options, args) = op.parse_args()
     if len(args) >= 1:
-        filename = args[0]
+        pathToDll = args[0]
     else:
         filename = "."
-    displayInfo()
+    displayInfo(pathToDll)
 
 if __name__ == '__main__':
     main()

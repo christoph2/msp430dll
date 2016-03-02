@@ -37,7 +37,6 @@ from msp430dll.debug import DebugAPI
 from msp430dll.logger import Logger
 
 MSP430_DLL = "msp430"
-MSP_DLL = r"."
 
 """
 #ifdef WIN32
@@ -53,7 +52,7 @@ class DLL(object):
 
     _dllInstances = {}
 
-    def __new__(cls, dllPath = MSP_DLL):
+    def __new__(cls, dllPath = '.'):
         if dllPath not in DLL._dllInstances:
             klass = super(DLL, cls).__new__(cls)
             dll = DLL._loadDll(dllPath)
