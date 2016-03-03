@@ -28,30 +28,109 @@ __copyright__ = """
 
 from optparse import OptionParser
 from pprint import pprint
+import re
 import sys
 
 from msp430dll import DLL
-from msp430dll.base import SystemNotifyCallback
+from msp430dll.base import SystemNotifyCallback, ArchType
 from msp430dll.debug import DebugAPI, RUN_MODES
 from msp430dll.utils import cygpathToWin
 
 def myCallback(*params):
     print("myCallback called with: {0}".format(params))
 
-def displayInfo(pathToDll, port = 'TIUSB'):
-    dll = DLL(pathToDll)
+
+def displayMemoryInfo(name, start, stop):
+    if not start and not stop:
+        rangeDescription = "[Not implemented]"
+    else:
+        rangeDescription = "from 0x{0:04x} to 0x{1:04x} ({2:>6d} bytes)".format(start, stop, stop - start + 1)
+    return "{0:<10}: {1}".format(name, rangeDescription)
+
+def yesNo(value):
+    if value == 1:
+        return "yes"
+    elif value == 0:
+        return "no"
+    else:
+        return "<unknown>"
+
+def beautifyEnumerator(value):
+    """
+    """
+    return re.sub(r"([^.]*\.)(.*)", r"\2", str(value))
+
+def displayInfo(pathToDll, dllName, port = 'TIUSB'):
+    """[
+ ('clockControl', 1),
+ ('coreIpId', 0),
+ ('deviceIdPtr', 0L),
+ ('eemVersion', 0),
+ ('emulation', 1),
+ ('endian', 43605),
+ ('id', 52),
+ ('jtagId', 0),
+ ('nBreakpointsDma', 0),
+ ('nBreakpointsOptions', 0),
+ ('nBreakpointsReadWrite', 0),
+ ('nCombinations', 2),
+ ('nCycleCounter', 0),
+ ('nCycleCounterOperations', 0),
+ ('nRegTrigger', 0),
+ ('nRegTriggerOperations', 0),
+ ('nSequencer', 0),
+ ('nStateStorage', 0),
+ ('nTrigerMask', 0),
+]
+    """
+    dll = DLL(pathToDll, dllName)
     dll.logger.setLevel("debug")
-    print hex(dll.base.initialize(port))
+    ver = dll.base.initialize(port)
+    major = ver / 10000000
+    minor = ver / 100000
+    patch = ver / 1000
+    print("Dll-Version : {0}.{1}.{2:04d}".format(major, minor, patch))
+
+    """uint32_t VersionInfo::get () const
+{
+        /* a.bb.cc.ddd */
+        return (this->imajor * 10000000) + (this->iminor * 100000) + (this->patch * 1000) + this->flavor;
+}
+    """
 
     dll.base.setVCC(3000)
 
-    print dll.base.getVCC()
-    print dll.base.getExternalVoltage()
     dll.base.openDevice()
 
     result = dll.base.MSP430_SET_SYSTEM_NOTIFY_CALLBACK(SystemNotifyCallback(myCallback))
     device =  dll.base.getFoundDevice()
-    pprint(sorted(device._asdict().items()))
+    print("Controller: {0}".format(device.string))
+    print("Arch.     : {0}".format(beautifyEnumerator(ArchType(device.cpuArch))))
+    print("\n")
+    print("Memory")
+    print("-"*60)
+    print(displayMemoryInfo('RAM',device.ramStart ,device.ramEnd))
+    print(displayMemoryInfo('RAM2',device.ram2Start ,device.ram2End))
+    print(displayMemoryInfo('FLASH',device.mainStart ,device.mainEnd))
+    print(displayMemoryInfo('INFO',device.infoStart ,device.infoEnd))
+    print(displayMemoryInfo('BSL',device.bslStart ,device.bslEnd))
+    print(displayMemoryInfo('LCD',device.lcdStart ,device.lcdEnd))
+    print("FRAM      : {0}".format(yesNo(device.hasFramMemory)))
+    print("\n")
+    print("Voltages")
+    print("-"*60)
+    print("VCC       : {0:2.2f} V".format(dll.base.getVCC() / 1000.0))
+    #print("ext. VCC  : {0:2.2f} V".format(dll.base.getExternalVoltage() / 1000.0))
+    print("Min. VCC  : {0:2.2f} V".format(device.vccMinOp / 1000.0))
+    print("Max. VCC  : {0:2.2f} V".format(device.vccMaxOp / 1000.0))
+    print("Test VCC  : {0}".format(yesNo(device.hasTestVpp)))
+    print("\n")
+    print("Debugging")
+    print("-"*60)
+    print("Brk.-Pts. : {0}".format(device.nBreakpoints))
+    print("\n")
+    print("Registers")
+    print("-"*60)
 
     #mem = dll.base.readMemory(dev.infoStart, None, dev.infoStart + dev.infoEnd + 1)
     #dll.base.readOutFile(dev.infoStart, dev.infoStart + dev.infoEnd + 1, "info.hex", FileType.FILETYPE_INTEL_HEX)
@@ -121,15 +200,14 @@ def main():
     args=[]
 
     op = OptionParser(usage = usage,version = "%prog " + __version__, description = "Display informations about connected MSP430 controllers.")
-    op.add_option('-f', '--dump-flash', help = "dump content of flash memory", dest = "dumpFlash", action = 
-    "store_true", default = False)
+    op.add_option('-n', '--dll-name', help = "Name of DLL", dest = "dllName", type = str, default = "msp430")
 
     (options, args) = op.parse_args()
     if len(args) >= 1:
         pathToDll = args[0]
     else:
         pathToDll = "."
-    displayInfo(cygpathToWin(pathToDll))
+    displayInfo(cygpathToWin(pathToDll), options.dllName)
 
 if __name__ == '__main__':
     main()
