@@ -60,6 +60,8 @@ REGISTER_ALIAS = {
     "CG2":  "R3",
 }
 
+REGISTER_ALIAS_INV = dict((v, k) for k, v in REGISTER_ALIAS.items())
+
 def registerAlias(regName):
     return REGISTER_ALIAS.get(regName, regName)
 

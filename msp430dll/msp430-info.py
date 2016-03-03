@@ -33,7 +33,7 @@ import sys
 
 from msp430dll import DLL
 from msp430dll.base import SystemNotifyCallback, ArchType
-from msp430dll.debug import DebugAPI, RUN_MODES
+from msp430dll.debug import DebugAPI, RUN_MODES, REGISTER_ALIAS_INV
 from msp430dll.utils import cygpathToWin
 from msp430dll.errors import ErrorType
 
@@ -71,6 +71,7 @@ def externalVoltage(voltage, status):
 def displayRegisters(registers):
     for register in registers.items():
         name, value = register
+        name = REGISTER_ALIAS_INV.get(name, name)
         print("{0:<3} = 0x{1:04x}".format(name, value))
 
 def displayInfo(pathToDll, dllName, port = 'TIUSB'):
