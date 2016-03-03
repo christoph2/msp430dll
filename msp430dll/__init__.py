@@ -52,10 +52,12 @@ class DLL(object):
 
     _dllInstances = {}
 
-    def __new__(cls, dllPath = '.'):
+    def __new__(cls, dllPath = '.', dllName = 'msp430'):
         if dllPath not in DLL._dllInstances:
             klass = super(DLL, cls).__new__(cls)
-            dll = DLL._loadDll(dllPath)
+            dll = DLL._loadDll(dllPath, dllName)
+            cls.dllPath = dllPath
+            cls.dllName = dllName
             cls.logger = Logger()
 
             baseApi = BaseAPI(dll)
@@ -75,10 +77,10 @@ class DLL(object):
         return inst.klass
 
     @classmethod
-    def _loadDll(cls, dllPath):
+    def _loadDll(cls, dllPath, dllName):
         currentPath = os.getcwd()
         os.chdir(dllPath)
-        mspDll = ctypes.windll.LoadLibrary(MSP430_DLL)
+        mspDll = ctypes.windll.LoadLibrary(dllName)
         os.chdir(currentPath)
         return mspDll
 
