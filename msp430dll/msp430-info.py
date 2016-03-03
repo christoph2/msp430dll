@@ -35,6 +35,7 @@ from msp430dll import DLL
 from msp430dll.base import SystemNotifyCallback, ArchType
 from msp430dll.debug import DebugAPI, RUN_MODES
 from msp430dll.utils import cygpathToWin
+from msp430dll.errors import ErrorType
 
 def myCallback(*params):
     print("myCallback called with: {0}".format(params))
@@ -59,6 +60,18 @@ def beautifyEnumerator(value):
     """
     """
     return re.sub(r"([^.]*\.)(.*)", r"\2", str(value))
+
+def externalVoltage(voltage, status):
+    if status == ErrorType.NO_ERR:
+        return "{0:2.2f} V".format(voltage / 1000.0)
+    else:
+        return beautifyEnumerator(status)
+
+
+def displayRegisters(registers):
+    for register in registers.items():
+        name, value = register
+        print("{0:<3} = 0x{1:04x}".format(name, value))
 
 def displayInfo(pathToDll, dllName, port = 'TIUSB'):
     """[
@@ -89,21 +102,15 @@ def displayInfo(pathToDll, dllName, port = 'TIUSB'):
     major = ver / 10000000
     minor = ver / 100000
     patch = ver / 1000
-    print("Dll-Version : {0}.{1}.{2:04d}".format(major, minor, patch))
+    #print("Dll-Version : {0}.{1}.{2:04d}".format(major, minor, patch))
 
-    """uint32_t VersionInfo::get () const
-{
-        /* a.bb.cc.ddd */
-        return (this->imajor * 10000000) + (this->iminor * 100000) + (this->patch * 1000) + this->flavor;
-}
-    """
-
-    dll.base.setVCC(3000)
+    #dll.base.setVCC(3000)
 
     dll.base.openDevice()
 
     result = dll.base.MSP430_SET_SYSTEM_NOTIFY_CALLBACK(SystemNotifyCallback(myCallback))
     device =  dll.base.getFoundDevice()
+    print("\n")
     print("Controller: {0}".format(device.string))
     print("Arch.     : {0}".format(beautifyEnumerator(ArchType(device.cpuArch))))
     print("\n")
@@ -120,7 +127,7 @@ def displayInfo(pathToDll, dllName, port = 'TIUSB'):
     print("Voltages")
     print("-"*60)
     print("VCC       : {0:2.2f} V".format(dll.base.getVCC() / 1000.0))
-    #print("ext. VCC  : {0:2.2f} V".format(dll.base.getExternalVoltage() / 1000.0))
+    print("ext. VCC  : {0}".format(externalVoltage(*dll.base.getExternalVoltage())))
     print("Min. VCC  : {0:2.2f} V".format(device.vccMinOp / 1000.0))
     print("Max. VCC  : {0:2.2f} V".format(device.vccMaxOp / 1000.0))
     print("Test VCC  : {0}".format(yesNo(device.hasTestVpp)))
@@ -131,32 +138,29 @@ def displayInfo(pathToDll, dllName, port = 'TIUSB'):
     print("\n")
     print("Registers")
     print("-"*60)
-
+    displayRegisters(dll.debug.readRegisters())
     #mem = dll.base.readMemory(dev.infoStart, None, dev.infoStart + dev.infoEnd + 1)
     #dll.base.readOutFile(dev.infoStart, dev.infoStart + dev.infoEnd + 1, "info.hex", FileType.FILETYPE_INTEL_HEX)
 
-    jid  = dll.base.getJTAGId()
-    print("JTAG-ID: {0:#x}".format(jid))
+    #jid  = dll.base.getJTAGId()
+    #print("JTAG-ID: {0:#x}".format(jid))
 
     #print(dll.interfaces())
 
-    result = dll.debug.readRegisters()
-    print(result)
 
-    dll.debug.writeRegister(5, 4711)
+    #dll.debug.writeRegister(5, 4711)
 
-    result = dll.debug.readRegister(5)
-    print(result)
+    #result = dll.debug.readRegister(5)
+    #print(result)
 
     #result = dll.debug.readRegistersExt()
     #print(result)
 
     #print(DLL.loadedDlls())
-
-    print("STATE: {0}".format(dll.debug.getState(1)))
+    #print("STATE: {0}".format(dll.debug.getState(1)))
 
     dll.debug.run(RUN_MODES.FREE_RUN, 1)
-    print dll.base.MSP430_Close(0)
+    dll.base.MSP430_Close(0)
 
 
 
