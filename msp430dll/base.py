@@ -28,7 +28,7 @@ __copyright__ = """
 
 from collections import namedtuple
 from ctypes import addressof, byref, create_string_buffer, cast, c_char, c_char_p, c_int32, POINTER, Structure, Union
-from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, ULONG, WINFUNCTYPE
+from ctypes.wintypes import BYTE, BOOL, WORD, LONG, ULONG, WINFUNCTYPE
 
 import enum
 from msp430dll.api import API, STATUS_T
@@ -75,7 +75,7 @@ class _DeviceStructure(Structure):
             ("nCycleCounter", WORD),            #: Number of cycle counters of MSP430.
             ("nCycleCounterOperations", WORD),  #: Cycle couter modes.
             ("nSequencer", WORD),               #: Msp430 has Sequencer.
-            ("hasFramMemory", WORD),            #:  Msp430 has FRAM Memory.
+            ("hasFramMemory", WORD),            #: Msp430 has FRAM Memory.
         ]
 
 
@@ -222,7 +222,7 @@ class BaseAPI(API):
         ("MSP430_GetNumberOfUsbIfs", STATUS_T, [POINTER(LONG)]),
         ("MSP430_GetNameOfUsbIf", STATUS_T, [LONG, POINTER(c_char_p), POINTER(LONG)]),
         ("MSP430_SET_SYSTEM_NOTIFY_CALLBACK", STATUS_T, [SystemNotifyCallback]),
-        ("MSP430_Initialize", STATUS_T, [c_char_p, POINTER(DWORD)]),
+        ("MSP430_Initialize", STATUS_T, [c_char_p, POINTER(LONG)]),
         ("MSP430_Close", STATUS_T, [LONG]),
         ("MSP430_GetJtagID", STATUS_T, [POINTER(LONG)]),
         ("MSP430_GetFoundDevice", STATUS_T, [c_char_p, LONG]),
@@ -294,7 +294,7 @@ class BaseAPI(API):
             \n       USB_FET_BUSY_ERR
             \n           COMM_ERR
         """
-        version = DWORD()
+        version = LONG()
         self.MSP430_Initialize(port, byref(version))
         self.debug("MSP430_Initialize('{0}') - version returned: {1:#x}".format(port, version.value))
         return version.value
