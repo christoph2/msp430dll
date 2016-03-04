@@ -46,7 +46,7 @@ def displayMemoryInfo(name, start, stop):
         rangeDescription = "[Not implemented]"
     else:
         rangeDescription = "from 0x{0:04x} to 0x{1:04x} ({2:>6d} bytes)".format(start, stop, stop - start + 1)
-    return "{0:<10}: {1}".format(name, rangeDescription)
+    return "{0:<13}: {1}".format(name, rangeDescription)
 
 def yesNo(value):
     if value == 1:
@@ -87,13 +87,9 @@ def displayInfo(pathToDll, dllName, port = 'TIUSB'):
  ('nBreakpointsDma', 0),
  ('nBreakpointsOptions', 0),
  ('nBreakpointsReadWrite', 0),
- ('nCombinations', 2),
- ('nCycleCounter', 0),
  ('nCycleCounterOperations', 0),
  ('nRegTrigger', 0),
  ('nRegTriggerOperations', 0),
- ('nSequencer', 0),
- ('nStateStorage', 0),
  ('nTrigerMask', 0),
 ]
     """
@@ -112,8 +108,8 @@ def displayInfo(pathToDll, dllName, port = 'TIUSB'):
     result = dll.base.MSP430_SET_SYSTEM_NOTIFY_CALLBACK(SystemNotifyCallback(myCallback))
     device =  dll.base.getFoundDevice()
     print("\n")
-    print("Controller: {0}".format(device.string))
-    print("Arch.     : {0}".format(beautifyEnumerator(ArchType(device.cpuArch))))
+    print("Controller   : {0}".format(device.string))
+    print("Architekture : {0}".format(beautifyEnumerator(ArchType(device.cpuArch))))
     print("\n")
     print("Memory")
     print("-"*60)
@@ -123,19 +119,23 @@ def displayInfo(pathToDll, dllName, port = 'TIUSB'):
     print(displayMemoryInfo('INFO',device.infoStart ,device.infoEnd))
     print(displayMemoryInfo('BSL',device.bslStart ,device.bslEnd))
     print(displayMemoryInfo('LCD',device.lcdStart ,device.lcdEnd))
-    print("FRAM      : {0}".format(yesNo(device.hasFramMemory)))
+    print("FRAM         : {0}".format(yesNo(device.hasFramMemory)))
     print("\n")
     print("Voltages")
     print("-"*60)
-    print("VCC       : {0:2.2f} V".format(dll.base.getVCC() / 1000.0))
-    print("ext. VCC  : {0}".format(externalVoltage(*dll.base.getExternalVoltage())))
-    print("Min. VCC  : {0:2.2f} V".format(device.vccMinOp / 1000.0))
-    print("Max. VCC  : {0:2.2f} V".format(device.vccMaxOp / 1000.0))
-    print("Test VCC  : {0}".format(yesNo(device.hasTestVpp)))
+    print("VCC          : {0:2.2f} V".format(dll.base.getVCC() / 1000.0))
+    print("ext. VCC     : {0}".format(externalVoltage(*dll.base.getExternalVoltage())))
+    print("Min. VCC     : {0:2.2f} V".format(device.vccMinOp / 1000.0))
+    print("Max. VCC     : {0:2.2f} V".format(device.vccMaxOp / 1000.0))
+    print("Test VCC     : {0}".format(yesNo(device.hasTestVpp)))
     print("\n")
     print("Debugging")
     print("-"*60)
-    print("Brk.-Pts. : {0}".format(device.nBreakpoints))
+    print("Brk.-Points. : {0}".format(device.nBreakpoints))
+    print("Combinations : {0}".format(device.nCombinations))
+    print("Cycle-ctr.   : {0}".format(yesNo(device.nCycleCounter)))
+    print("Sequencer    : {0}".format(yesNo(device.nSequencer)))
+    print("State storage: {0}".format(yesNo(device.nStateStorage)))
     print("\n")
     print("Registers")
     print("-"*60)
