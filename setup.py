@@ -59,4 +59,5 @@ setup(
             'msp430-info = msp430dll.msp430_info:main',
         ],
     },
+    test_suite="msp430dll.tests"
 )
