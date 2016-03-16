@@ -34,6 +34,7 @@ import os
 from msp430dll.api import API, StatusCode, STATUS_T
 from msp430dll.base import BaseAPI, FileType
 from msp430dll.debug import DebugAPI
+from msp430dll.eem import EMMAPI
 from msp430dll.logger import Logger
 
 MSP430_DLL = "msp430"
@@ -60,16 +61,20 @@ class DLL(object):
             cls.dllName = dllName
             cls.logger = Logger()
 
-            baseApi = BaseAPI(dll)
+            baseApi = BaseAPI(klass, dll)
             baseApi.loadFunctions()
             klass.base = baseApi
 
-            debugApi = DebugAPI(dll)
+            debugApi = DebugAPI(klass, dll)
             debugApi.loadFunctions()
             klass.debug = debugApi
 
             debugApi.errorNumber = baseApi.errorNumber
             debugApi.errorString = baseApi.errorString
+
+            eemApi = EMMAPI(klass, dll)
+            eemApi.loadFunctions()
+            klass.eem = eemApi
 
             DLL._dllInstances[dllPath] = Instance(klass, dll)
         inst = DLL._dllInstances[dllPath]
