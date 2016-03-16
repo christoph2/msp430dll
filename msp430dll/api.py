@@ -41,8 +41,9 @@ class StatusCode(enum.IntEnum):
 
 class API(object):
 
-    def __init__(self, dll):
+    def __init__(self, parent, dll):
         self.dll = dll
+        self.parent = parent
         self.unsupported = []
         self.logger = Logger()
 
@@ -52,8 +53,8 @@ class API(object):
 
     def returnValue(self, value):
         if value == -1:
-            errno = self.errorNumber()
-            errstr = self.errorString(errno)
+            errno = self.parent.base.errorNumber()
+            errstr = self.parent.base.errorString(errno)
             raise MSPError("{0} -- {1}.".format(errno, errstr), errno = errno)
         elif value != 0:
             self.warn("Unexpected return value: {0}".format(value))
