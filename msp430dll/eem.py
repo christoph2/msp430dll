@@ -28,12 +28,13 @@ __copyright__ = """
 
 from collections import OrderedDict
 from ctypes import addressof, byref, create_string_buffer, cast, c_char, c_char_p, c_int
-from ctypes import Array, c_int32, c_uint32, c_uint16, Structure, POINTER, Union
+from ctypes import Array, c_int32, c_uint32, c_uint16, c_uint64, Structure, POINTER, Union
 from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, LPVOID, WINFUNCTYPE
 
 import enum
 from msp430dll.api import API, STATUS_T
 from msp430dll.base import ReadWriteType
+from msp430dll.utils import StructureWithEnums
 
 
 MAXHANDLE       = 20  #: The definition of MAXHANDLE is twice of the number of Memory-Bus and Register-Write triggers. More handles are impossible.
@@ -43,45 +44,47 @@ MAX_SEQ_TRIGGER = 4  #: The definition of MAX_SEQ_TRIGGER is the number of avail
 MAX_SEQ_STATE   = 4  #: The definition of MAX_SEQ_STATE is the number of available states of the sequencer.
 
 
-class MappedStructure(Structure):
-    _map = {}
+class MessageIdType(StructureWithEnums):
+    """Event message identification structure:
+    This structure contains the message identifications for the
+    different event messages sent by the DLL. Events are sent by the
+    DLL to inform the caller of a change of state (e.g. breakpoint hit)
+    or to provide data to the caller.
+    """
+    _pack_ = 1
+    _fields_ = [
+        ("uiMsgIdSingleStep", DWORD), #: Message identification for "Single step complete" event.
+        ("uiMsgIdBreakpoint", DWORD), #: Message identification for "Breakpoint hit" event.
+        ("uiMsgIdStorage", DWORD),    #: Message identification for "Storage on trace buffer" event.
+        ("uiMsgIdState", DWORD),      # Message identification for "Change in new state of the sequencer" event.
+        ("uiMsgIdWarning", DWORD),    #: Message identification for "Warning" event.
+        ("uiMsgIdCPUStopped", DWORD), #: Message identification for "Device CPU stopped" event.
+    ]
 
-    def __getattribute__(self, name):
-        _map = Structure.__getattribute__(self, '_map')
-        value = Structure.__getattribute__(self, name)
-        if name in _map:
-            converter = _map[name]
-            if isinstance(value, Array):
-                return [converter(x) for x in value]
-            return converter(value)
-        else:
-            return value
 
-
-class MessageIdType(MappedStructure):
-        _pack_ = 1
-        _fields_ = [
-            ("uiMsgIdSingleStep", DWORD), #: Message identification for "Single step complete" event.
-            ("uiMsgIdBreakpoint", DWORD), #: Message identification for "Breakpoint hit" event.
-            ("uiMsgIdStorage", DWORD),    #: Message identification for "Storage on trace buffer" event.
-            ("uiMsgIdState", DWORD),      # Message identification for "Change in new state of the sequencer" event.
-            ("uiMsgIdWarning", DWORD),    #: Message identification for "Warning" event.
-            ("uiMsgIdCPUStopped", DWORD), #: Message identification for "Device CPU stopped" event.
-        ]
+class MessageType(enum.IntEnum):
+   WMX_SINGLESTEP   = 0x0400
+   WMX_BREKAPOINT   = 0x0401
+   WMX_STORAGE      = 0x0402
+   WMX_STATE        = 0x0403
+   WMX_WARNING      = 0x0404
+   WMX_STOPPED      = 0x0405
 
 
 class WarningCodes(enum.IntEnum):
-   WAR_CLR_COMBINE = 0        #: Combination removed.
-   WAR_CLR_BP_COMBINE = 1     #: Breakpoint removed from combination.
-   WAR_MOD_COMBINE = 2        #: Properties of combination changed.
-   WAR_RESET = 3              #: Reset device
-   WAR_DIS_TR_TRIGGER = 4     #: Trace trigger action is disabled and stored.
-   WAR_EN_TR_TRIGGER = 5      #: Stored trace trigger action is enabled.
-   WAR_EEM_THREAD_ACTIVE = 6  #: Polling thread is active - function call not allowed at the moment.
-   WAR_EEM_CONFLICT = 7       #: forbidden old API call.
+    """WarCode contains the warning codes that are sent as an event."""
+    WAR_CLR_COMBINE = 0        #: Combination removed.
+    WAR_CLR_BP_COMBINE = 1     #: Breakpoint removed from combination.
+    WAR_MOD_COMBINE = 2        #: Properties of combination changed.
+    WAR_RESET = 3              #: Reset device
+    WAR_DIS_TR_TRIGGER = 4     #: Trace trigger action is disabled and stored.
+    WAR_EN_TR_TRIGGER = 5      #: Stored trace trigger action is enabled.
+    WAR_EEM_THREAD_ACTIVE = 6  #: Polling thread is active - function call not allowed at the moment.
+    WAR_EEM_CONFLICT = 7       #: forbidden old API call.
 
 
 class BpMode(enum.IntEnum):
+    """BpMode gives the supported modes for a breakpoint."""
     BP_CLEAR = 0    #: Clear breakpoint.
     BP_CODE = 1     #: Set code breakpoint.
     BP_RANGE = 2    #: Set range breakpoint.
@@ -90,12 +93,14 @@ class BpMode(enum.IntEnum):
 
 
 class BpType(enum.IntEnum):
+    """BpType gives the supported types for a breakpoint."""
     BP_MAB = 0      #: Set MAB breakpoint.
     BP_MDB = 1      #: Set MDB breakpoint.
     BP_REGISTER = 2 #: Set register breakpoint.
 
 
 class BpAccess(enum.IntEnum):
+    """BpAccess gives the supported access modes for a breakpoint."""
     BP_FETCH = 0                  #: Instuction fetch.
     BP_FETCH_HOLD = 1             #: Instruction fetch & hold trigger.
     BP_NO_FETCH = 2               #: No instruction fetch.
@@ -115,14 +120,16 @@ class BpAccess(enum.IntEnum):
 
 
 class BpAction(enum.IntEnum):
-   BP_NONE = 0      #: No action on trigger (necessary for sequencer mechanism).
-   BP_BRK = 1       #: Break on trigger.
-   BP_STO = 2       #: Trigger state storage (trace mechnism) on trigger.
-   BP_BRK_STO = 3   #: Break and trigger state storage on trigger.
-   BP_CC = 4        #: Cycle counter.
+    """BpAction gives the supported actions for a breakpoint."""
+    BP_NONE = 0      #: No action on trigger (necessary for sequencer mechanism).
+    BP_BRK = 1       #: Break on trigger.
+    BP_STO = 2       #: Trigger state storage (trace mechnism) on trigger.
+    BP_BRK_STO = 3   #: Break and trigger state storage on trigger.
+    BP_CC = 4        #: Cycle counter.
 
 
 class BpOperat(enum.IntEnum):
+    """BpOperat gives the supported comparison operators for a breakpoint."""
     BP_EQUAL = 0    #: Address/value equal MAB/MDB.
     BP_GREATER = 1  #: Address/value greater MAB/MDB.
     BP_LOWER = 2    #: Address/value lower MAB/MDB.
@@ -130,17 +137,18 @@ class BpOperat(enum.IntEnum):
 
 
 class BpRangeAction(enum.IntEnum):
+    """BpRangeAction gives the supported range control for a range breakpoint."""
     BP_INSIDE = 0   #: Inside range.
     BP_OUTSIDE = 1  #: Outside range.
 
 
 class BpCondition(enum.IntEnum):
-    """BpCondition gives the exist condition for a complex breakpoint. Used inside the BREAKPOINT structure."""
+    """BpCondition gives the exist condition for a complex breakpoint."""
     BP_NO_COND = 0  #: No condition available.
     BP_COND = 1     #: Condition available.
 
 
-class BpParameter(MappedStructure):
+class BpParameter(StructureWithEnums):
     """The breakpoint structure contains the settings which are required to set, modify or clear a breakpoint."""
     _pack_ = 1
     _fields_ = [
@@ -194,7 +202,7 @@ class TrAction(enum.IntEnum):
     TR_ALL_CYCLE = 1 #: Trace information on all MCLK clocks.
 
 
-class TrParameter(MappedStructure):
+class TrParameter(StructureWithEnums):
     """Trace parameter structure:
        The data structure contains the configuration settings of the EEM trace function.
     """
@@ -212,7 +220,7 @@ class TrParameter(MappedStructure):
 #print(param.trControl, param.trMode, param.trAction)
 
 
-class TraceBuffer(MappedStructure):
+class TraceBuffer(StructureWithEnums):
     """Trace buffer readout structure:
     The data structure is a copy of one position of the hardware trace buffer.
     They consist of data in a 40 bit buffer. The 40 bits are divided in 16 bit MAB,
@@ -248,7 +256,7 @@ class VwDataType(enum.IntEnum):
     VW_32 = 2   #: Long.
 
 
-class VwParameter(MappedStructure):
+class VwParameter(StructureWithEnums):
     """Variable watch parameter structure:
     The data structure contains the settings of one variable.
     """
@@ -263,7 +271,7 @@ class VwParameter(MappedStructure):
     }
 
 
-class VwResources(MappedStructure):
+class VwResources(StructureWithEnums):
     """Variable watch resource structure:
     The data structure contains the resources of one variable trigger.
     """
@@ -318,7 +326,7 @@ class CcGeneralCLK(enum.IntEnum):
     CC_STP_TACLK    = (1 << 5)  #: Stop TACLK on emulation halt (only for standard clock control).
 
 
-class CcParameter(MappedStructure):
+class CcParameter(StructureWithEnums):
     """Clock control parameter structure:
     The data structure contains the settings of the clock control features.
     """
@@ -349,7 +357,7 @@ class SeqState(enum.IntEnum):
     SEQ_STATE3 = 3  #: Switch in state 3.
 
 
-class SeqParameter(MappedStructure):
+class SeqParameter(StructureWithEnums):
     """Sequencer parameter structure:
     The data structure contains the configuration settings of the sequencer.
     To select no trigger provide zero as handle.
@@ -426,7 +434,7 @@ class CycleCounterClearMode(enum.IntEnum):
     CYC_CLEAR_ON_COUNTER = 0x2  #: Reset counter when other counter automatically resets (only targets with 2 counters).
 
 
-class CycleCounterConfig(MappedStructure):
+class CycleCounterConfig(StructureWithEnums):
     """Cycle counter parameter structure:
     The data structure contains the configuration settings for a cycle counter.
     """
@@ -458,13 +466,29 @@ Msp430EventnotifyFunc = WINFUNCTYPE(None, c_uint32, c_uint32, c_int32, c_int32)
 class EMMAPI(API):
 
     FUNCTIONS = (
-        #MessageIdType
         ("MSP430_EEM_Init", STATUS_T, [Msp430EventnotifyFunc, c_int32, POINTER(MessageIdType)]),
         ("MSP430_EEM_SetBreakpoint", STATUS_T, [POINTER(c_uint16), POINTER(BpParameter)]),
         ("MSP430_EEM_GetBreakpoint", STATUS_T, [c_uint16, POINTER(BpParameter)]),
-        #("MSP430_EEM_SetCombineBreakpoint", STATUS_T, [CbControl, c_uint16, POINTER(c_uint16), POINTER(c_uint16)]),
-
-        #DLL430_SYMBOL STATUS_T WINAPI MSP430_EEM_SetCombineBreakpoint(CbControl_t CbControl, uint16_t wCount, uint16_t* pwCbHandle, const uint16_t* pawBpHandle);
+        ("MSP430_EEM_SetCombineBreakpoint", STATUS_T, [c_int, c_uint16, POINTER(c_uint16), POINTER(c_uint16)]),
+        ("MSP430_EEM_GetCombineBreakpoint", STATUS_T, [c_uint16, POINTER(c_uint16), POINTER(c_uint16)]),
+        ("MSP430_EEM_SetTrace", STATUS_T, [POINTER(TrParameter)]),
+        ("MSP430_EEM_GetTrace", STATUS_T, [POINTER(TrParameter)]),
+        ("MSP430_EEM_ReadTraceBuffer", STATUS_T, [POINTER(TraceBuffer)]),
+        ("MSP430_EEM_ReadTraceData", STATUS_T, [POINTER(TraceBuffer), POINTER(c_uint32)]),
+        ("MSP430_EEM_RefreshTraceBuffer", STATUS_T, []),
+        ("MSP430_EEM_SetVariableWatch", STATUS_T, [c_int]),
+        ("MSP430_EEM_SetVariable", STATUS_T, [POINTER(c_uint16), POINTER(VwParameter)]),
+        ("MSP430_EEM_GetVariableWatch", STATUS_T, [POINTER(c_int), POINTER(VwResources)]),
+        ("MSP430_EEM_SetClockControl", STATUS_T, [POINTER(CcParameter)]),
+        ("MSP430_EEM_GetClockControl", STATUS_T, [POINTER(CcParameter)]),
+        ("MSP430_EEM_SetSequencer", STATUS_T, [POINTER(SeqParameter)]),
+        ("MSP430_EEM_GetSequencer", STATUS_T, [POINTER(SeqParameter)]),
+        ("MSP430_EEM_ReadSequencerState", STATUS_T, [POINTER(c_int)]),
+        ("MSP430_EEM_SetCycleCounterMode", STATUS_T, [c_int]),
+        ("MSP430_EEM_ConfigureCycleCounter", STATUS_T, [c_uint32, CycleCounterConfig]),
+        ("MSP430_EEM_ReadCycleCounterValue", STATUS_T, [c_uint32, POINTER(c_uint64)]),
+        ("MSP430_EEM_WriteCycleCounterValue", STATUS_T, [c_uint32, c_uint64]),
+        ("MSP430_EEM_ResetCycleCounter", STATUS_T, [c_uint32]),
     )
 
     def init(self, callback, clientHandle, parameters):
@@ -482,5 +506,86 @@ class EMMAPI(API):
         self.MSP430_EEM_GetBreakpoint(handle, byref(param))
         return param
 
-    def setCombineBreakpoint(self):
-        self.MSP430_EEM_SetCombineBreakpoint()
+    def setCombineBreakpoint(self, control, count, combinationHandles):
+        handle = c_uint16()
+        self.MSP430_EEM_SetCombineBreakpoint(control, count, byref(handle), byref(combinationHandles))
+        return handle
+
+    def getCombineBreakpoint(self, handle):
+        count = c_uint16()
+        bpHandles = c_uint16()
+        self.MSP430_EEM_GetCombineBreakpoint(handle, byref(count), byref(bpHandles))
+        return (count, bpHandles)
+
+    def setTrace(self, parameter):
+        self.MSP430_EEM_SetTrace(byref(parameter))
+
+    def getTrace(self):
+        destBuff = TrParameter()
+        self.MSP430_EEM_GetTrace(byref(destBuff))
+        return destBuff
+
+    def readTraceBuffer(self):
+        buffer = TraceBuffer()
+        self.MSP430_EEM_ReadTraceBuffer(byref(buffer))
+        return buffer
+
+    def readTraceData(self):
+        buffer = TraceBuffer()
+        pulCount = c_uint32(1)
+        self.MSP430_EEM_ReadTraceData(byref(buffer), byref(pulCount))
+        return (buffer, pulCount)
+
+    def refreshTraceBuffer(self):
+        self.MSP430_EEM_RefreshTraceBuffer()
+
+    def setVariableWatch(self, ena):
+        self.MSP430_EEM_SetVariableWatch(ena)
+
+    def setVariable(self, handle, buffer):
+        self.MSP430_EEM_SetVariable(byref(handle), byref(buffer))
+
+    def getVariableWatch(self):
+        ena = VwEnable()
+        resource = VwResources()
+        self.MSP430_EEM_GetVariableWatch(byref(ena), byref(resource))
+        return (ena, resource)
+
+    def setClockControl(self, parameter):
+        self.MSP430_EEM_SetClockControl(byref(parameter))
+
+    def getClockControl(self):
+        parameter = CcParameter()
+        self.MSP430_EEM_SetClockControl(byref(parameter))
+        return parameter
+
+    def setSequencer(self, parameter):
+        self.MSP430_EEM_SetSequencer(byref(parameter))
+
+    def getSequencer(self):
+        parameter = SeqParameter()
+        self.MSP430_EEM_GetSequencer(byref(parameter))
+        return paramter
+
+    def readSequencerState(self):
+        state = c_int()
+        self.MSP430_EEM_ReadSequencerState(byref(state))
+        return SeqState(state)
+
+    def setCycleCounterMode(self, mode):
+        self.MSP430_EEM_SetCycleCounterMode(mode)
+
+    def configureCycleCounter(self, counter, config):
+        self.MSP430_EEM_ConfigureCycleCounter(counter, config)
+
+    def readCycleCounterValue(self, counter):
+        value = c_uint64
+        self.MSP430_EEM_ReadCycleCounterValue(counter, byref(value))
+        return value
+
+    def writeCycleCounterValue(self, counter, value):
+        self.MSP430_EEM_WriteCycleCounterValue(counter, value)
+
+    def resetCycleCounter(self, counter):
+        self.MSP430_EEM_ResetCycleCounter(counter)
+
