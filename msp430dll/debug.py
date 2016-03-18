@@ -27,7 +27,7 @@ __copyright__ = """
 """
 
 from collections import OrderedDict
-from ctypes import addressof, byref, create_string_buffer, cast, c_char, c_char_p, c_int32, POINTER, Union
+from ctypes import addressof, byref, create_string_buffer, cast, c_char, c_char_p, c_int32, c_void_p, POINTER, Union
 from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, LPVOID, WINFUNCTYPE
 
 import enum
@@ -112,6 +112,68 @@ class DEVICE_CLOCK_CONTROL(enum.IntEnum):
     GCC_STANDARD_I  = 3 # Device has General Clock Control register (Note 1793).
 
 
+class EEM_GCLKCTRL(Structure):
+    """MCLKCTRL0F to MCLKCTRL00 reflect the bit description strings for MCLKCTRL0."""
+    _pack = 1
+    _fields_ = [
+        ("GENCLKCTRLF", c_char_p),
+        ("GENCLKCTRLE", c_char_p),
+        ("GENCLKCTRLD", c_char_p),
+        ("GENCLKCTRLC", c_char_p),
+        ("GENCLKCTRLB", c_char_p),
+        ("GENCLKCTRLA", c_char_p),
+        ("GENCLKCTRL9", c_char_p),
+        ("GENCLKCTRL8", c_char_p),
+        ("GENCLKCTRL7", c_char_p),
+        ("GENCLKCTRL6", c_char_p),
+        ("GENCLKCTRL5", c_char_p),
+        ("GENCLKCTRL4", c_char_p),
+        ("GENCLKCTRL3", c_char_p),
+        ("GENCLKCTRL2", c_char_p),
+        ("GENCLKCTRL1", c_char_p),
+        ("GENCLKCTRL0", c_char_p),
+    ]
+
+class EEM_MCLKCTRL(Structure):
+    """MCLKCTRL0F to MCLKCTRL00 reflect the bit description strings for MCLKCTRL0."""
+    _pack = 1
+    _fields_ = [
+        ("MCLKCTRL0F", c_char_p),
+        ("MCLKCTRL0E", c_char_p),
+        ("MCLKCTRL0D", c_char_p),
+        ("MCLKCTRL0C", c_char_p),
+        ("MCLKCTRL0B", c_char_p),
+        ("MCLKCTRL0A", c_char_p),
+        ("MCLKCTRL09", c_char_p),
+        ("MCLKCTRL08", c_char_p),
+        ("MCLKCTRL07", c_char_p),
+        ("MCLKCTRL06", c_char_p),
+        ("MCLKCTRL05", c_char_p),
+        ("MCLKCTRL04", c_char_p),
+        ("MCLKCTRL03", c_char_p),
+        ("MCLKCTRL02", c_char_p),
+        ("MCLKCTRL01", c_char_p),
+        ("MCLKCTRL00", c_char_p),
+        #
+        ("MCLKCTRL1F", c_char_p),
+        ("MCLKCTRL1E", c_char_p),
+        ("MCLKCTRL1D", c_char_p),
+        ("MCLKCTRL1C", c_char_p),
+        ("MCLKCTRL1B", c_char_p),
+        ("MCLKCTRL1A", c_char_p),
+        ("MCLKCTRL19", c_char_p),
+        ("MCLKCTRL18", c_char_p),
+        ("MCLKCTRL17", c_char_p),
+        ("MCLKCTRL16", c_char_p),
+        ("MCLKCTRL15", c_char_p),
+        ("MCLKCTRL14", c_char_p),
+        ("MCLKCTRL13", c_char_p),
+        ("MCLKCTRL12", c_char_p),
+        ("MCLKCTRL11", c_char_p),
+        ("MCLKCTRL10", c_char_p),
+    ]
+
+
 # Bits of the EEM General Clock Control register (F41x).
 TCE_SMCLK   = (1 << 0) # Clock SMCLK with TCLK. See Note 1.
 ST_ACLK     = (1 << 1) # Stop ACLK
@@ -152,8 +214,8 @@ class DebugAPI(API):
         ("MSP430_Register", STATUS_T, [POINTER(c_int32), c_int32, c_int32]),
         ("MSP430_Run", STATUS_T, [c_int32, c_int32]),
         ("MSP430_State", STATUS_T, [POINTER(c_int32), c_int32, POINTER(c_int32)]), #  STATUS_T MSP430_State(int32_t* state, int32_t stop, int32_t* pCPUCycles);
-        ("MSP430_CcGetClockNames", STATUS_T, [c_char_p, POINTER(DWORD)]),
-        ("MSP430_CcGetModuleNames", STATUS_T, [c_char_p, POINTER(DWORD)]),
+        ("MSP430_CcGetClockNames", STATUS_T, [c_int32, POINTER(c_void_p)]),
+        ("MSP430_CcGetModuleNames", STATUS_T, [c_int32, POINTER(c_void_p)]),
     )
 
     def run(self, mode, releaseJTAG):
@@ -186,7 +248,6 @@ class DebugAPI(API):
         self.MSP430_Registers(regPointer, ALL_REGS, ReadWriteType.READ)
         return OrderedDict(zip(DEVICE_REGISTERS.__members__, registers))
 
-
     def readRegistersExt(self):
         treg = c_int32 * 16
         registers = treg()
@@ -194,3 +255,8 @@ class DebugAPI(API):
         self.MSP430_ExtRegisters(regPointer, ALL_REGS, 1, ReadWriteType.READ)
         return OrderedDict(zip(DEVICE_REGISTERS.__members__, registers))
 
+    def getClockNames(self, localDeviceId):
+        result = EEM_GCLKCTRL()
+        pref = cast(result, c_void_p)
+        MSP430_CcGetClockNames.self(localDeviceId, byref(pref))
+        return result
