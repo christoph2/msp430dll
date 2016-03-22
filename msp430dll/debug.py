@@ -33,6 +33,8 @@ from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, LPVOID, WINFUNCTYPE
 import enum
 from msp430dll.api import API, STATUS_T
 from msp430dll.base import ReadWriteType
+from msp430dll.utils import StructureWithEnums
+
 
 class DEVICE_REGISTERS(enum.IntEnum):
     R0 = 0
@@ -112,7 +114,7 @@ class DEVICE_CLOCK_CONTROL(enum.IntEnum):
     GCC_STANDARD_I  = 3 # Device has General Clock Control register (Note 1793).
 
 
-class EEM_GCLKCTRL(Structure):
+class EEM_GCLKCTRL(StructureWithEnums):
     """MCLKCTRL0F to MCLKCTRL00 reflect the bit description strings for MCLKCTRL0."""
     _pack = 1
     _fields_ = [
@@ -134,7 +136,7 @@ class EEM_GCLKCTRL(Structure):
         ("GENCLKCTRL0", c_char_p),
     ]
 
-class EEM_MCLKCTRL(Structure):
+class EEM_MCLKCTRL(StructureWithEnums):
     """MCLKCTRL0F to MCLKCTRL00 reflect the bit description strings for MCLKCTRL0."""
     _pack = 1
     _fields_ = [
@@ -214,8 +216,8 @@ class DebugAPI(API):
         ("MSP430_Register", STATUS_T, [POINTER(c_int32), c_int32, c_int32]),
         ("MSP430_Run", STATUS_T, [c_int32, c_int32]),
         ("MSP430_State", STATUS_T, [POINTER(c_int32), c_int32, POINTER(c_int32)]), #  STATUS_T MSP430_State(int32_t* state, int32_t stop, int32_t* pCPUCycles);
-        ("MSP430_CcGetClockNames", STATUS_T, [c_int32, POINTER(c_void_p)]),
-        ("MSP430_CcGetModuleNames", STATUS_T, [c_int32, POINTER(c_void_p)]),
+        ("MSP430_CcGetClockNames", STATUS_T, [c_int32, POINTER(POINTER(EEM_GCLKCTRL))]),
+        ("MSP430_CcGetModuleNames", STATUS_T, [c_int32, POINTER(POINTER(EEM_MCLKCTRL))]),
     )
 
     def run(self, mode, releaseJTAG):
@@ -255,8 +257,15 @@ class DebugAPI(API):
         self.MSP430_ExtRegisters(regPointer, ALL_REGS, 1, ReadWriteType.READ)
         return OrderedDict(zip(DEVICE_REGISTERS.__members__, registers))
 
-    def getClockNames(self, localDeviceId):
-        result = EEM_GCLKCTRL()
-        pref = cast(result, c_void_p)
-        MSP430_CcGetClockNames.self(localDeviceId, byref(pref))
-        return result
+    def getClockNames(self, localDeviceId = 0):
+        result = POINTER(EEM_GCLKCTRL)()
+        self.MSP430_CcGetClockNames(localDeviceId, byref(result))
+        return result.contents
+
+
+    def getModuleNames(self, localDeviceId = 0):
+        result = POINTER(EEM_MCLKCTRL)()
+        self.MSP430_CcGetModuleNames(localDeviceId, byref(result))
+        return result.contents
+
+
