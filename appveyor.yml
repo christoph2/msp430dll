@@ -54,7 +54,7 @@ on_success:
   - dir "%PYTHON%\\Scripts"
   - "%PYTHON%\\python -m coverage xml"
   - -cmd: dir .
-  - "%PYTHON%\\Scripts\\coveralls""
+  - "%PYTHON%\\Scripts\\coveralls"
   - "%PYTHON%\\python -m python-codacy-coverage -r coverage.xml"
   - "%PYTHON%\\python -m codeclimate-test-reporter"
 
