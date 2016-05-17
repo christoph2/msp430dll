@@ -35,8 +35,8 @@ test_script:
   # the interpreter you're using - Appveyor does not do anything special
   # to put the Python evrsion you want to use on PATH.
   # - "build.cmd %PYTHON%\\python.exe setup.py test"
-  - "%PYTHON%\\python -m coverage run --source=objutils setup.py test"
-  - cmd: dir .
+  - "%PYTHON%\\Scripts\\coverage run --source=msp430dll setup.py test"
+  #- cmd: dir .
 
 after_test:
   # This step builds your wheels.
@@ -50,11 +50,11 @@ artifacts:
   - path: dist\*
 
 on_success:
-  - cmd: dir .
+  #- cmd: dir .
+  - cmd: set
   - dir "%PYTHON%\\Scripts"
-  - "%PYTHON%\\python -m coverage xml"
-  - -cmd: dir .
+  - "%PYTHON%\\Scripts\\coverage xml"
   - "%PYTHON%\\Scripts\\coveralls"
-  - "%PYTHON%\\python -m python-codacy-coverage -r coverage.xml"
-  - "%PYTHON%\\python -m codeclimate-test-reporter"
+  - "%PYTHON%\\Scripts\\python-codacy-coverage -r coverage.xml"
+  - "%PYTHON%\\Scripts\\codeclimate-test-reporter"
 
