@@ -28,7 +28,8 @@ __copyright__ = """
 
 from collections import namedtuple
 from ctypes import addressof, byref, create_string_buffer, cast, c_char, c_char_p, c_int32, POINTER, Structure, Union
-from ctypes.wintypes import BYTE, BOOL, WORD, LONG, ULONG, WINFUNCTYPE
+from ctypes.wintypes import BYTE, BOOL, WORD, LONG, ULONG
+from ctypes import WINFUNCTYPE
 
 import enum
 from msp430dll.api import API, STATUS_T

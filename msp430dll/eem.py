@@ -29,7 +29,8 @@ __copyright__ = """
 from collections import OrderedDict
 from ctypes import addressof, byref, create_string_buffer, cast, c_char, c_char_p, c_int
 from ctypes import Array, c_int32, c_uint32, c_uint16, c_uint64, Structure, POINTER, Union
-from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, LPVOID, WINFUNCTYPE
+from ctypes.wintypes import BYTE, BOOL, WORD, DWORD, LONG, LPVOID
+from ctypes import WINFUNCTYPE
 
 import enum
 from msp430dll.api import API, STATUS_T
