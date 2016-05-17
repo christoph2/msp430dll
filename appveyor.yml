@@ -48,7 +48,8 @@ artifacts:
   - path: dist\*
 
 on_success:
-  - coveralls
+  - dir "%PYTHON%\\Scripts"
+#  - coveralls
   - "%PYTHON%\\python -m coverage xml"
   - "%PYTHON%\\python -m python-codacy-coverage -r coverage.xml"
   - "%PYTHON%\\python -m codeclimate-test-reporter"
