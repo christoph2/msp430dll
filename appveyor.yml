@@ -1,6 +1,9 @@
 environment:
   COVERALLS_REPO_TOKEN:
     secure: Uc9hWsLZbpChByOX0klDvkoJjH6EVG9Pi3OSA8CjH457phd8e7dK0PG8AHUHBjyt
+  CODACY_PROJECT_TOKEN:
+    secure: Ue4guTvtX8WIunnFw5FD67GIjGhBuWbwKZTi+7SQFfEUelKcvwlT6kS/Pq62aE/I
+
   matrix:
 
     # For Python versions available on Appveyor, see
@@ -21,6 +24,7 @@ environment:
 
 install:
   # We need wheel installed to build wheels
+  - set PATH=%PYTHON%\\Scripts;%PATH%
   - "%PYTHON%\\python.exe -m pip install wheel coveralls coverage codacy-coverage codeclimate-test-reporter"
   - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
 
