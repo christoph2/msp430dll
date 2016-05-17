@@ -24,9 +24,9 @@ environment:
 
 install:
   # We need wheel installed to build wheels
-  - set PATH=%PYTHON%\\Scripts;%PATH%
-  - "%PYTHON%\\python.exe -m pip install wheel coveralls coverage codacy-coverage codeclimate-test-reporter"
-  - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
+  - set PATH=%PYTHON%\Scripts;%PATH%
+  - pip install wheel coveralls coverage codacy-coverage codeclimate-test-reporter"
+  - pip install -r requirements.txt
 
 build: off
 
@@ -60,5 +60,5 @@ on_success:
   - "%PYTHON%\\Scripts\\coverage xml"
   - "%PYTHON%\\Scripts\\coveralls"
   - "%PYTHON%\\Scripts\\python-codacy-coverage -r coverage.xml"
-  - "%PYTHON%\\Scripts\\codeclimate-test-reporter"
+# - "%PYTHON%\\Scripts\\codeclimate-test-reporter"
 
