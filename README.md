@@ -3,6 +3,7 @@ MSP430DLL
 ---
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/a8f53cc5ff8a44579aa33504e17ae318)](https://www.codacy.com/app/cpu12-gems/msp430dll)
 [![Code Climate](https://codeclimate.com/github/christoph2/msp430dll/badges/gpa.svg)](https://codeclimate.com/github/christoph2/msp430dll)
+[![Build status](https://ci.appveyor.com/api/projects/status/ayd40voeq9r6qte9?svg=true)](https://ci.appveyor.com/project/christoph2/msp430dll)
 [![GPL License](http://img.shields.io/badge/license-GPL-blue.svg)](http://opensource.org/licenses/GPL-2.0)
 
 Welcome to MSP430DLL!
