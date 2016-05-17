@@ -1,6 +1,6 @@
 environment:
   COVERALLS_REPO_TOKEN:
-  	secure: Uc9hWsLZbpChByOX0klDvkoJjH6EVG9Pi3OSA8CjH457phd8e7dK0PG8AHUHBjyt
+    secure: Uc9hWsLZbpChByOX0klDvkoJjH6EVG9Pi3OSA8CjH457phd8e7dK0PG8AHUHBjyt
   matrix:
 
     # For Python versions available on Appveyor, see
