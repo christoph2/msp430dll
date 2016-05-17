@@ -1,5 +1,6 @@
 environment:
-
+  COVERALLS_REPO_TOKEN:
+  	secure: Uc9hWsLZbpChByOX0klDvkoJjH6EVG9Pi3OSA8CjH457phd8e7dK0PG8AHUHBjyt
   matrix:
 
     # For Python versions available on Appveyor, see
@@ -20,7 +21,7 @@ environment:
 
 install:
   # We need wheel installed to build wheels
-  - "%PYTHON%\\python.exe -m pip install wheel"
+  - "%PYTHON%\\python.exe -m pip install wheel coveralls coverage codacy-coverage codeclimate-test-reporter"
   - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
 
 build: off
@@ -46,7 +47,11 @@ artifacts:
   # bdist_wheel puts your built wheel in the dist directory
   - path: dist\*
 
-#on_success:
+on_success:
+  - coveralls
+  - "%PYTHON%\\python -m coverage xml"
+  - "%PYTHON%\\python -m python-codacy-coverage -r coverage.xml"
+  - "%PYTHON%\\python -m codeclimate-test-reporter"
 #  You can use this step to upload your artifacts to a public website.
 #  See Appveyor's documentation for more details. Or you can simply
 #  access your wheels from the Appveyor "artifacts" tab for your build.
