@@ -57,8 +57,8 @@ on_success:
   #- cmd: dir .
   - cmd: set
   - dir "%PYTHON%\\Scripts"
-  - "%PYTHON%\\Scripts\\coverage xml"
-  - "%PYTHON%\\Scripts\\coveralls"
-  - "%PYTHON%\\Scripts\\python-codacy-coverage -r coverage.xml"
+  - coverage xml
+  - coveralls
+  - python-codacy-coverage -r coverage.xml
 # - "%PYTHON%\\Scripts\\codeclimate-test-reporter"
 
